@@ -1,24 +1,16 @@
-require 'colorize'
-require 'english'
+require 'open3'
 
 class GitRunner
-  def branch(flags = '-a')
-    branch_command_output = `gitd branch #{flags} 2>&1`
+  def branch
+    output_str = ''
 
-    format_output(branch_command_output)
-  end
+    Open3.popen2e("git branch -a 2>&1") do |stdin, output, wait_thr|
+      while line = output.gets
+        output_str << line
+      end
+    end
 
-  private
-
-  def format_output(output)
-    return formatted_error(output) unless $CHILD_STATUS.success?
-
-    output
-  end
-
-  def formatted_error(error_str)
-    output =  "There was an error!\n".colorize(:red).underline
-    output << error_str
+    output_str
   end
 end
 
